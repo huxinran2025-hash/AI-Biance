@@ -1,0 +1,28 @@
+{
+  "name": "@biance/server",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@biance/shared": "0.0.1",
+    "@google/genai": "^1.27.0",
+    "big.js": "^6.2.2",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "prom-client": "^15.1.2",
+    "sql.js": "^1.11.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.14.0",
+    "@types/ws": "^8.5.12",
+    "tsx": "^4.19.1",
+    "typescript": "~5.8.2"
+  }
+}

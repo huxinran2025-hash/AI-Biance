@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "noEmit": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@biance/shared/*": ["../../shared/src/*"],
+      "~/*": ["./*"],
+      "./*": ["./*"]
+    }
+  },
+  "include": ["src", "scripts"],
+  "references": [
+    { "path": "../shared" }
+  ]
+}
