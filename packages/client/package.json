@@ -1,0 +1,28 @@
+{
+  "name": "@biance/client",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run theme:guard && npm run i18n:check && vite build",
+    "preview": "vite preview",
+    "i18n:check": "node scripts/find-i18n-dup.js",
+    "theme:guard": "node scripts/theme-guard.js"
+  },
+  "dependencies": {
+    "@biance/shared": "0.0.1",
+    "lightweight-charts": "^5.0.9",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "recharts": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}

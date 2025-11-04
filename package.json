@@ -1,32 +1,9 @@
 {
-  "name": "personal-automated-quant-trading-system",
+  "name": "biance-monorepo",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "npm run theme:guard && npm run i18n:check && vite build",
-    "preview": "vite preview",
-    "i18n:check": "node scripts/find-i18n-dup.js",
-    "theme:guard": "node scripts/theme-guard.js"
-  },
-  "dependencies": {
-    "@google/genai": "^1.27.0",
-    "big.js": "^6.2.2",
-    "lightweight-charts": "^5.0.9",
-    "openai": "^4.73.0",
-    "prom-client": "^15.1.2",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "recharts": "^3.3.0",
-    "sql.js": "^1.11.0",
-    "ws": "^8.18.0"
-  },
-  "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@types/ws": "^8.5.12",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
-  }
+  "workspaces": [
+    "packages/client",
+    "packages/server",
+    "packages/shared"
+  ]
 }
