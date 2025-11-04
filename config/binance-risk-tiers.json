@@ -1,0 +1,34 @@
+{
+  "accountMaxExposurePct": 0.3,
+  "coolDownWeight": 0.5,
+  "emergencyFlattenAll": true,
+  "tiers": {
+    "T1": {
+      "maxLeverage": 10,
+      "perOrderCapPct": 0.05,
+      "symbolCapPct": 0.15,
+      "dailyTurnoverCapPct": 0.8
+    },
+    "T2": {
+      "maxLeverage": 5,
+      "perOrderCapPct": 0.03,
+      "symbolCapPct": 0.1,
+      "dailyTurnoverCapPct": 0.5
+    },
+    "T3": {
+      "maxLeverage": 2,
+      "perOrderCapPct": 0.01,
+      "symbolCapPct": 0.05,
+      "dailyTurnoverCapPct": 0.2
+    }
+  },
+  "slippageBps": {
+    "buy": 20,
+    "sell": 25,
+    "panic": 50
+  },
+  "fallbackMarketIfMinNotionalBlocked": true,
+  "priceBandPct": 0.02
+}
+
+

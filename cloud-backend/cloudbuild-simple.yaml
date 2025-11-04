@@ -1,0 +1,63 @@
+steps:
+  # Install dependencies
+  - name: 'node:20'
+    entrypoint: npm
+    args: ['install']
+    dir: 'cloud-backend'
+  
+  # Build TypeScript
+  - name: 'node:20'
+    entrypoint: npm
+    args: ['run', 'build']
+    dir: 'cloud-backend'
+  
+  # Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'asia-east1-docker.pkg.dev/biance-476510/biance-repo/backend:latest'
+      - '-f'
+      - 'cloud-backend/Dockerfile'
+      - 'cloud-backend'
+  
+  # Push Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'asia-east1-docker.pkg.dev/biance-476510/biance-repo/backend:latest'
+  
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'biance-backend'
+      - '--image'
+      - 'asia-east1-docker.pkg.dev/biance-476510/biance-repo/backend:latest'
+      - '--region'
+      - 'asia-east1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--service-account'
+      - 'biance-ai@biance-476510.iam.gserviceaccount.com'
+      - '--set-env-vars'
+      - 'GOOGLE_CLOUD_PROJECT=biance-476510'
+      - '--min-instances'
+      - '1'
+      - '--max-instances'
+      - '10'
+      - '--memory'
+      - '1Gi'
+      - '--cpu'
+      - '1'
+      - '--timeout'
+      - '300'
+
+images:
+  - 'asia-east1-docker.pkg.dev/biance-476510/biance-repo/backend:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

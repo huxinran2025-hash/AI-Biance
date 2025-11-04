@@ -1,0 +1,25 @@
+{
+  "tierMap": {
+    "BTCUSDT": "T1",
+    "ETHUSDT": "T1",
+    "BNBUSDT": "T1",
+    "SOLUSDT": "T2",
+    "OPUSDT": "T2",
+    "SUIUSDT": "T2",
+    "XRPUSDT": "T2",
+    "DOGEUSDT": "T2",
+    "ADAUSDT": "T2",
+    "ATOMUSDT": "T2",
+    "AVAXUSDT": "T2",
+    "NEARUSDT": "T2",
+    "INJUSDT": "T2",
+    "ARBUSDT": "T2",
+    "APTUSDT": "T2",
+    "LINKUSDT": "T1",
+    "DOTUSDT": "T2",
+    "FILUSDT": "T2",
+    "TRXUSDT": "T2"
+  }
+}
+
+

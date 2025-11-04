@@ -1,0 +1,21 @@
+# 排除不必要的文件
+node_modules/
+.git/
+*.log
+*.tmp
+*.ps1
+*.sql
+services/
+dist/
+test-*.ps1
+deploy*.ps1
+setup-*.ps1
+setup-*.sql
+
+# 保留必要文件
+!src/
+!package.json
+!package-lock.json
+!tsconfig.json
+!Dockerfile
+!cloudbuild.yaml

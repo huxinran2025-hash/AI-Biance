@@ -1,0 +1,5 @@
+{
+  "name": "Personal Automated Quant Trading System",
+  "description": "A frontend dashboard for a personal automated quantitative trading system. It allows users to set risk boundaries, monitor real-time performance, and manually control the system's operational state. The philosophy is 'survive first, then make money'.",
+  "requestFramePermissions": []
+}

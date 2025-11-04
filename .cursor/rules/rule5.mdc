@@ -1,0 +1,5 @@
+---
+description:用artifactregistry部署
+globs:
+alwaysApply: true
+---

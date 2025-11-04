@@ -1,0 +1,24 @@
+{
+  "allowedPairs": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "BNBUSDT",
+    "SOLUSDT",
+    "OPUSDT",
+    "SUIUSDT",
+    "XRPUSDT",
+    "DOGEUSDT",
+    "ADAUSDT",
+    "ATOMUSDT",
+    "AVAXUSDT",
+    "NEARUSDT",
+    "INJUSDT",
+    "ARBUSDT",
+    "APTUSDT",
+    "LINKUSDT",
+    "DOTUSDT",
+    "FILUSDT",
+    "TRXUSDT"
+  ]
+}
+

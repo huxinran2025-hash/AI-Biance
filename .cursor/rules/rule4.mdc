@@ -1,0 +1,5 @@
+---
+description:完成开发之后除非我强烈要求，不要写.MD或.TXT总结
+globs:
+alwaysApply: true
+---

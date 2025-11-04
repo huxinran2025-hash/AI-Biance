@@ -1,0 +1,5 @@
+---
+description:优先查找系统已经有了的功能代码，在开发过程中不要重复开发已经有了的功能
+globs:
+alwaysApply: true
+---

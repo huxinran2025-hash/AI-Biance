@@ -1,0 +1,1424 @@
+UI/UX大改版方案
+1. 单页总体布局（桌面端 1920x1080 为目标）
+
+视觉参考 = 你发的 Binance 深色盘口 + 我们自己的资金曲线 but 走“内容优先”而不是“巨大大字海报风”。
+
+页面永远只有这一个主屏。没有多页 Dashboard vs Trading 的概念。
+
+整个主屏拆成 4 个主要行：
+
+行 A（顶部状态行，高度 ~ 60px，固定在最上方，粘性定位）
+
+左 → 右依次是：
+
+我们净值 & 涨跌幅（这是唯一可以稍微大一点的数字）
+
+账户风险指示灯（保证金使用率、回撤状态等）
+
+系统模式 / 交易状态（NORMAL / COOL_DOWN 等）
+
+时间 & 数据延迟
+
+右上角：语言切换 / 资金配置按钮（打开侧边浮层，不跳页）/ 停止AI交易按钮
+
+这个行是细高的黑色/深灰 bar，一直悬浮在最上方（position: sticky; top: 0; z-index高）。整行高度不超过 60px，字号 12px～13px。
+
+行 B（主交易行，高度 ~ 500-600px，占中间上半屏的全宽）
+
+这一行被切成三列，横向三分布局：
+
+B1 左列 (~25% 宽)
+
+实时 Order Book（买卖盘+最近成交），像 Binance 左侧那块
+
+我们只做最基本：
+
+上半：盘口堆叠(卖单红/买单绿)，显示价格、数量、总额
+
+下半：最近成交（Price、Amount、Time）
+
+字号 11px～12px，行高紧凑（14px～16px），背景分隔浅浅的 #1a1d22 深灰块
+
+B2 中列 (~50% 宽)
+
+K 线图 + 成交量柱
+
+上一行小信息 bar：当前交易对 (例：BTC/USDT)、现价、24h变化%、24h高/低/成交量
+
+K 线本身最大化使用垂直高度，像你要的“超大K线”
+
+下面一小条 tab 不是“切换别的币”，而是 “Chart / Trading Data / AI Reasoning”，但是默认展示 Chart，不自动切走
+
+这个中列是整页视觉中心
+
+B3 右列 (~25% 宽)
+
+我们支持币池（固定那 6-10 个币）价格列表
+
+列表样式参考你刚发的“Top Tokens by Market Cap”截图：币图标 + ticker + 现价 + 24h %
+
+永远全部展开成一个滚动区（scroll-y）
+
+点某个币并不会页面跳走，而是“把中间K线和左边orderbook都切到那个币”，也就是整页同步切换选中的 symbol
+
+在这个币列表下半部分：系统/AI日志（最近10条），每条是单行 11px 灰字，点击可以展开浮层看详情
+
+关键点：行 B 其实就是“现货交易终端”。
+
+行 C（下方交易控制区，高度 ~ 180-220px，全宽）
+
+这行整体是深灰卡片，边框上细线，视觉类似 Binance 底部下单面板。
+
+它分成左右两块：
+
+C1 下单与仓位控制 (左 ~60%)
+
+Tabs: 持仓 / 下单
+
+持仓 tab：展示当前账号对“选中币种”的仓位：方向、多空、数量、名义价值、杠杆、未实现盈亏、止盈/止损线（实时）
+
+允许一键平仓 / 调整止损，按钮是很小的矩形 10px 字
+
+下单 tab：Limit / Market / Stop
+
+价格输入框 / 数量输入框 / 杠杆选择 / 提交按钮
+
+这是手工 override AI 的地方
+
+所有输入框都用很紧凑的行高（28px左右）
+
+C2 账户风险 & 审批状态 (右 ~40%)
+
+账户整体指标（现金占比、杠杆、最大回撤、保证金使用率）小字表格化展示
+
+系统当前模式（NORMAL / COOL_DOWN / etc）+ 火/警告小图标
+
+“AI交易开关”小toggle（允许/禁止AI下新单，但不平已有仓）
+
+“自动风险减仓状态” (有没有触发分批止盈、有没有上移止损)
+
+这些是我们给“交易委员会”的一眼风控总览
+
+目标：这块区域让人知道“系统还能不能开新仓・为什么不能开”。
+
+行 D（最底部 ~ 160-200px，高度可折叠）
+
+“风险新闻 / 交易所健康 / 稳定币状态 / 监管快讯” 的 ticker bar
+
+这块是我们的 RSS + Exchange Risk Watcher
+
+默认折叠成单行跑马灯（像交易所公告条）。
+
+展开时，占满整行，以两列列表形式：
+
+左列：关键风险源状态（binance / usdt / solana / usdc / ethereum / 监管）每项一行，状态是 OK / CRITICAL 的红绿chips
+
+右列：最新3-5条重要RSS headline（SEC/FCA/CFTC/ESMA等），超长就截断，hover 显示 tooltip 全文
+
+2. 各区域详细规格
+
+下面是前端落地重点（给工程/设计师）：
+
+2.1 颜色 & 主题
+
+背景主色：#0f1117 ~ #14161c（深灰接近 Binance 风格）
+
+分区容器色块：#1a1d22 / #1e2129
+
+边框线：rgba(255,255,255,0.06)
+
+文本主色：rgba(255,255,255,0.9)
+
+次级文本：rgba(255,255,255,0.6)
+
+三级/注释：rgba(255,255,255,0.4)
+
+红色跌幅：#ff4d4f-ish
+
+绿色涨幅：#2ecc71-ish
+
+黄色告警：#facc15-ish
+
+Risk critical 背景 chip：红底带0.1透明，红字；OK 是绿色同理
+
+整体要“Binance 深色 + 我们自己的极简边框”，而不是玻璃拟态。
+
+2.2 字体 & 尺寸
+
+你要求“小字高密度”，所以我们定：
+
+全站基础字号：12px
+
+表格行 / 列表行：11px～12px
+
+顶部资金总额：16px 粗体（标签12px，数字16px），这是页面里唯一可以稍微大一点的字
+
+行高：1.2～1.3，不要大行高留太多空白
+
+按钮：高度28px（小按钮可以24px高），圆角4px，边框线+深灰背景
+
+2.3 顶部状态行（行 A）
+
+内容示例（从左到右）：
+
+[Equity $10,597.79 | +1.62%]
+
+Equity 数字 16px semi-bold，涨跌幅用绿色/红色chip 11px
+
+现金占比 30.3% / 上限 30%
+
+最大回撤 30.16%
+
+模式: COOL_DOWN_EXTERNAL_UNSAFE
+
+Binance: OK | USDT: CRITICAL | Solana: CRITICAL
+
+Last update: 19:41:03 UTC
+
+右上角是：
+
+“交易委员会⚙” → 点击右侧浮出 Panel（配置最大杠杆、资金使用上限、允许交易币种等）
+
+语言切换（中/EN）
+
+“暂停AI”小红按钮
+
+实现方式：
+
+flex row，gap 16px
+
+每个统计是小 label(11px 40%透明) + value(12px/16px)
+
+绝不换行，超长就截断+tooltip
+
+2.4 行 B 左列 (B1 Order Book)
+
+上半：卖盘在上，买盘在下。红/绿深浅渐变填充一半行背景，像交易所经典盘口
+
+列：Price (USDT) / Amount (BTC) / Total
+
+字号 11px
+
+每行高度 16px～18px
+
+下半：最近成交（按时间倒序），红卖/绿买，timestamp 11px 灰字
+
+底部显示当前价一条粗横线+大数字，和 Binance 一样
+
+2.5 行 B 中列 (B2 Chart)
+
+顶部信息条：
+
+[BTC/USDT] 113,270.01（现价，绿色/红色高亮，14px bold）
+
+24h Chg -0.90%
+
+24h High 116,086.00 24h Low 112,100.00
+
+24h Vol(BTC) 15,975.52
+
+24h Vol(USDT) 1,817,021,338.12
+全部小字 11px-12px，用 • 分隔
+
+中间：K线主图（蜡烛、均线，背景深灰，不要网格太花）
+
+下面成交量柱
+
+十字光标/hover tooltip，和实时最新价水平线
+
+要求刷新时价格轻微闪动，而不是整张重绘跳屏
+
+最下方一条小 TabBar（高度 ~28px）：
+
+Chart（默认）
+
+AI Reasoning（点了后，在同一矩形区域覆盖 K 线，显示最近 3 轮 “为什么我做多BTC/为什么我禁止开新单”，滚动文本，11px 字。再次点 Chart 回去K线。）
+
+Trading Data（盘口深度/未平仓量等聚合指标图表，以后扩展）
+
+注意：Tab 是“覆盖中间区域内容”而不是整页跳转。
+
+2.6 行 B 右列 (B3 Coins + AI 日志)
+上半：币列表（固定币池）
+
+表格列：
+
+Icon + Ticker (BTC)
+
+Last Price
+
+24h %
+
+24h Volume / Rank (可以二行小字)
+
+样式就照“Top Tokens by Market Capitalization”截图：左侧图标+名字，右侧多列紧凑。行高 32px～36px。
+我们不做“USDT/FDUSD/FDUSD tab 切换”那种，而是所有支持币一次性罗列，用滚动容器 overflow-y: auto; max-height ~ 60% of B3.
+
+点一行币：
+
+整个页面的“选中交易对” = 这行币
+
+左侧盘口(B1) 与 中央K线(B2) 都同步切换到这个交易对
+
+高亮这一行背景（类似你截图里 USDC 那行变深灰）
+
+下半：AI 日志 / 风控日志
+
+标题行： "AI行为日志"
+
+列表：按时间倒序，最新在上
+
+每条单行：19:40:46 model_B: 尝试开BTC多单, 被资金上限阻止 (30%/30%)
+
+字号 11px, 行高 14-15px
+
+颜色：正常白字，关键字(阻止/风险/冷静模式)用黄色或红色
+
+点击一条 -> 右侧浮出一个窄侧栏（Drawer，全屏不跳转），展示那条决策的详细自评和风控理由
+
+右列就是“行情列表 + AI黑盒解释窗口入口”。
+
+2.7 行 C (底部交易控制区)
+左半 C1 Tabs: 持仓 / 下单
+
+Tabs 高度约 28px，文字 12px
+
+持仓内容是一个紧凑表格：
+
+方向 (多/空，绿/红chip 10px字)
+
+仓位数量
+
+名义价值
+
+杠杆
+
+未实现盈亏（绿/红）
+
+止盈价 / 止损价
+
+动作列：调止损 / 平仓 小按钮 (24px高, 11px字)
+
+下单内容：
+
+订单类型 tabs: Limit / Market / Stop
+
+两列表单：
+
+左列：输入价格/数量/杠杆
+
+右列：预估名义价值/保证金占用
+
+“买多”绿色按钮 / “卖空”红色按钮
+
+28px高，小圆角4px，字号12px，整块宽但不高
+
+底部放“仅减仓(REDUCE ONLY)”小checkbox，默认开启（特别重要：因为你说我们不想乱开高风险垃圾单）
+
+右半 C2 账户风控板
+
+一个小 info 卡片列出：
+
+现金占比 vs 下限 (例: 现金占比: 30.3% / 下限25%)
+
+杠杆使用: 账户杠杆 5.2x / 上限10x
+
+回撤: 最大回撤 30.16% / 阈值30%
+
+保证金使用率: 75% / 上限75%
+
+系统模式（带颜色 chip）:
+
+GREEN: NORMAL
+
+ORANGE: COOL_DOWN
+
+RED: EMERGENCY_LANDING
+
+AI交易状态: [ON/OFF toggle]
+
+“自动风险减仓: 已触发 / 未触发”
+
+“止损上移: 已锁盈 / 未锁盈”
+
+全部 11px 字，双列小表格式，像风控仪表板。基本思路：这里告诉用户“为什么AI此刻也许不能开新单”。
+
+2.8 行 D（底部风险条）
+
+默认状态：整页最底下一条 24px 高的 bar（深红/深黄/深灰根据风险），滚动显示最关键3条监管/交易所健康信息
+
+例如：[CRITICAL] USDT提现暂停 | CFTC起诉某交易所 | Solana网络交易延迟
+
+字号 11px，滚动 ticker
+
+用户点击该bar右侧的一个 “▲” 展开
+
+展开面板往上推开到 ~180px 高
+
+左列：所有关键基础设施状态 (binance/usdt/usdc/ethereum/solana/...) 一行一个状态灯
+
+右列：RSS关键标题列表（SEC / CFTC / FCA / ESMA 等监管更新 + 稳定币公告）
+
+Hover每行显示完整摘要
+
+这个面板不影响上面 B/C 行的布局，只是把最底部区域撑高
+
+3. 我们允许交易 & 重点展示的币种池
+
+你明确说了不想让 AI 去碰垃圾币。我们就硬编码“白名单币池”，UI 也只展示这些，不出现 meme 小垃圾。
+
+建议币池来源：你系统里本来就重点跟踪的主流大盘币，对应 liquidity 高、波动可控：
+
+BTCUSDT
+
+ETHUSDT
+
+BNBUSDT
+
+SOLUSDT
+
+XRPUSDT
+
+DOGEUSDT
+
+ADAUSDT
+
+AVAXUSDT
+
+LINKUSDT
+
+DOTUSDT
+
+这是 10 个，高流动性大盘/主流链生态币/头部老币，和你 types.ts 里面那批基本一致（BTC, ETH, BNB, SOL, XRP, DOGE, ADA, AVAX, LINK, DOT）。
+
+前端行为：
+
+右列币列表 (B3) 只渲染这 10 个
+
+“点击某币” = 切换全局 activeSymbol
+
+activeSymbol 驱动：
+
+顶部中列K线的数据
+
+左列盘口的数据
+
+下单面板的默认交易对
+
+持仓tab默认过滤当前币
+
+AI 不允许下单列表外的币（下单区域的交易对下拉，只能是这10个）
+
+后端策略如果想下单别的币，C2 风控板应显示“被风控拒绝：不在白名单”
+
+4. 交互 / 路由 / 弹窗规范
+4.1 单页原则
+
+整个 App 就是 /trade 这一个页面
+
+不切路由、不push history，不整体 rerender
+
+语言切换 / 委员会配置 / AI日志详情 / 风险大图 等，全部用右侧 Drawer 或底部 Slide-up 面板
+
+4.2 右侧 Drawer（浮层侧栏）
+
+以下行为都走右侧 Drawer：
+
+点击 AI 行为日志某一条 → 打开详细内容（模型提案、风控拒绝原因、自评摘要）
+
+点击“交易委员会⚙”→ 打开配置面板（最大杠杆、资金使用上限、可交易币种toggle）
+
+点击风控板中某个警告（例如“COOL_DOWN_EXTERNAL_UNSAFE”）→ 打开解释：是谁触发？是外部交易所问题还是我们资金压力？什么时候可以恢复？（这些文案你后端其实已经有）
+
+Drawer 样式：
+
+固定宽度 ~360px
+
+深灰底 (#1a1d22)
+
+左侧有一条很淡的边线
+
+字号 11px～12px
+
+关闭按钮是右上角 “×”
+
+4.3 底部 Slide-up（风控新闻区）
+
+行 D 的 ticker bar 点击后上滑展开，点击收起箭头再压回去
+
+内部可以滚动
+
+4.4 Hover / Tooltip
+
+任何截断的文本（长标题、长原因、长警告）用 tooltip 展示全量
+
+不要强制换行，因为你希望高密度
+
+4.5 响应式（后面可以做）
+
+当宽度 < 1440px 时：
+
+右列(B3)和行D底部风险区可能要叠成 tabs
+
+但我们先不用考虑移动端，你主要目标是桌面大屏交易台
+
+给前端同学的落地要点总结
+
+全局 layout：
+
+<div class="page flex flex-col h-screen bg-[#0f1117] text-[12px] text-white/90">
+
+A: <HeaderBar /> sticky top-0 h-[60px]
+
+B: <main class="flex flex-row flex-none h-[520px] border-b border-white/5">
+
+<OrderBookPanel class="w-[25%] border-r border-white/5" />
+
+<ChartPanel class="w-[50%] border-r border-white/5" />
+
+<MarketAndLogsPanel class="w-[25%]" />
+
+C: <TradeAndRiskPanel class="flex flex-row flex-none h-[200px] border-b border-white/5" />
+
+left flex-[3], right flex-[2]
+
+D: <RiskTickerBar class="flex-none h-[24px] ... expandable to h-[180px]" />
+
+<SideDrawer /> absolute right-0
+
+<BottomSlideUp /> absolute bottom-0
+
+字体/间距：
+
+全站 base font-size 12px
+
+行高紧 1.2
+
+表格行高 ~16px~18px
+
+顶栏 Equity 数字 16px bold, 其他 12px/11px
+
+所有按钮高度 24~28px，小圆角 4px
+
+功能联动：
+
+activeSymbol (全局状态)
+
+切换时同步刷新 OrderBookPanel / ChartPanel / TradeAndRiskPanel(下单&仓位)
+
+Drawer 用于详情，不改主屏路由
+
+SlideUp 用于新闻和外部风控现状
+
+白名单币池：
+
+只展示你指定的 10 个主流币 (BTC, ETH, BNB, SOL, XRP, DOGE, ADA, AVAX, LINK, DOT)
+
+下单只能选这些
+
+AI/风控/日志里出现其他符号 → 红色警告“非白名单，已拒绝”
+
+最后一句：
+这个方案 B 的精神就是“这是一个严肃的交易终端，不是炫酷大海报”。信息密度高、小字号、模块紧凑，整页永远保持盘口+K线+持仓+风控+风险新闻都在眼前，不用换页，也不会突然跳走到别的view。你要的“只做头部币种”在右列直接白名单化了，AI 也会被视觉上约束在这 10 个币上。
+0. 大目标回顾（给全队统一口径）
+
+我们不再有两个不同的大页面（ConfigurationScreen / DashboardScreen）。
+
+只有一个主交易终端页面：/trade.
+
+这个页面里永远同时展示：资金状态、盘口、K线、白名单币种列表、持仓/下单、账户风控、外部风险/RSS 新闻。
+
+一切弹窗/配置项都用 Drawer（右侧浮出）或底部 SlideUp（新闻），不跳路由。
+
+我们只允许交易固定白名单币种（BTC, ETH, BNB, SOL, XRP, DOGE, ADA, AVAX, LINK, DOT）。
+
+字小、行距紧、信息密集，风格参考 Binance 交易界面而不是炫大字 Dashboard。
+
+下面分成两部分：
+
+新的前端项目结构（包含组件、状态、hooks、类型）
+
+运行时数据流 / 调用逻辑（组件怎么拿数据、怎么互相联动、怎么跟后端交互）
+
+1. 前端文件结构（建议重构后）
+
+现有基础文件 (保留/复用的主要内容)
+
+src/
+  App.tsx                     # 整个应用入口（我们会在这里渲染 TradeTerminalPage）
+  index.tsx                   # React 启动点
+  vite.config.ts              # Vite
+  i18n.ts                     # 国际化
+  constants.ts                # 常量
+  types.ts                    # 全局类型定义（会扩展）
+  api-config.ts               # API 基础配置
+  api-client.ts               # fetch/axios 封装
+  components/
+    LanguageSwitcher.tsx      # 保留 (右上角语言切换)
+    icons.tsx                 # 统一图标
+    # ConfigurationScreen.tsx, DashboardScreen.tsx 之后会下线/拆分到下面新组件
+
+
+我们将引入新的页面级与模块级组件，形成下面结构（建议新增）：
+
+src/
+  pages/
+    TradeTerminalPage.tsx        # 主交易终端页面（唯一主页面）
+                                 # 用来拼装 HeaderBar / Panels / Drawers / SlideUp
+
+  state/
+    useGlobalStore.ts            # 全局状态（activeSymbol、accountSnapshot、riskState等）
+                                 # 可以用 Zustand 或自建 Context+Reducer
+    selectors.ts                 # 一些从全局状态派生的 selector (可选)
+
+  hooks/
+    useMarketData.ts             # 轮询指定symbol的盘口、最近成交、K线数据
+    useAccountData.ts            # 拉账户权益、现金占比、仓位、风险指标
+    useAiLogs.ts                 # 拉AI行为日志/风控拒绝记录
+    useRiskFeeds.ts              # RSS + 交易所健康状态
+    useConfigPanel.ts            # 用于打开/关闭“交易委员会”配置抽屉
+
+  components/trade-layout/
+    HeaderBar.tsx                # 顶部状态行 (行A)
+    PanelsRowMain.tsx            # 整个B行的容器 (横向3列: OrderBook / Chart / MarketList+Logs)
+      OrderBookPanel.tsx         # B1 左列：盘口+最近成交
+      ChartPanel.tsx             # B2 中列：K线/信息条/tab(Chart/AI Reasoning/Trading Data)
+      MarketAndLogsPanel.tsx     # B3 右列：白名单币列表 + AI日志列表
+        MarketList.tsx           # 币种列表（10个白名单币）
+        AiLogList.tsx            # AI行为日志列表 (简略版)
+    PanelsRowTrade.tsx           # C行容器 (下单+持仓 | 风控状态)
+      PositionAndOrderPanel.tsx  # C1 左半：Tabs(持仓/下单)
+        PositionTable.tsx        # 持仓Tab表格
+        OrderTicket.tsx          # 下单Tab表单
+      RiskOverviewPanel.tsx      # C2 右半：账户杠杆、回撤、冷静模式等
+    RiskTickerBar.tsx            # D行：底部风险ticker + 可展开的新闻/监管状态面板
+
+  components/drawers/
+    RightDrawer.tsx              # 通用右侧抽屉根容器
+    AiDecisionDetailDrawer.tsx   # 点击AI日志一条 -> 展示模型决策、自评、被风控的原因
+    CommitteeConfigDrawer.tsx    # 点击顶部“交易委员会⚙” -> 打开风险参数配置（杠杆上限、资金使用上限、允许币种开关等）
+    RiskModeDetailDrawer.tsx     # 点击风控状态chip -> 打开解释冷静模式原因/恢复条件
+                                 # 这些Drawer都挂在TradeTerminalPage里, 用useGlobalStore控制显隐
+
+  components/slideups/
+    RiskNewsSlideUp.tsx          # D行展开时的内容面板 (外部风险状态+RSS关键信息)
+                                 # 由 RiskTickerBar 控制打开/关闭
+
+  style/
+    tokens.css / tailwind.config.js
+                                 # 这里我们可以放颜色、字号、行高等UI token
+
+1.1 各组件职责简表
+pages/TradeTerminalPage.tsx
+
+页面根部件。
+
+布局顺序：
+
+<HeaderBar />
+
+<PanelsRowMain /> (OrderBook | Chart | Market+Logs)
+
+<PanelsRowTrade /> (Position/Order | RiskOverview)
+
+<RiskTickerBar />
+
+<RightDrawer /> (里面根据当前drawerMode渲染AiDecisionDetailDrawer / CommitteeConfigDrawer / RiskModeDetailDrawer)
+
+<RiskNewsSlideUp /> (底部SlideUp展开全局风险/RSS)
+
+这里会从 useGlobalStore() 取：
+
+activeSymbol 当前交易币
+
+accountSnapshot 资金、仓位、风险
+
+riskStatus 系统模式、告警
+
+drawerState / isRiskSlideOpen 等UI状态
+
+这个组件负责在 useEffect 里启动轮询 hooks (见后面数据流)。
+
+state/useGlobalStore.ts
+
+全局单一事实来源（类似全局context / Zustand store）：
+
+activeSymbol: string
+例如 "BTCUSDT"，由 MarketList 点击更新
+
+accountSnapshot: { equityUsd, pnlPct, cashPct, leverage, maxDrawdownPct, marginUsagePct, mode, ... }
+
+positions: Position[] 当前所有持仓
+
+orderBook: { bids:[], asks:[], lastTrades:[] } 对应 activeSymbol
+
+klineData: { candles:[], volume:[] } 对应 activeSymbol
+
+aiLogs: AiLogEntry[] 最近N条AI行为日志
+
+riskFeeds: { exchangeStates: ..., rssHeadlines: ... }
+
+drawerState: { type: 'none' | 'aiLogDetail' | 'committeeConfig' | 'riskModeDetail', data?: any }
+
+riskSlideOpen: boolean 底部风险新闻面板开/关
+
+update... actions: setActiveSymbol, openDrawer, closeDrawer, toggleRiskSlide, etc.
+
+lastUpdatedAt: number 最近一次全局刷新时间戳，用于HeaderBar展示
+
+这个store一方面接收 hooks 的更新（每次轮询拉新数据后dispatch），另一方面给各个面板读。
+
+components/trade-layout/HeaderBar.tsx
+
+对应 行A 顶部状态条。
+
+展示内容：
+
+账户净值 Equity + 当日涨跌幅（Equity数字可以用16px半粗；涨跌幅是绿色/红色chip）
+
+现金占比 / 上限
+
+保证金使用率 / 上限
+
+最大回撤 / 阈值
+
+当前系统模式chip (NORMAL / COOL_DOWN / EMERGENCY_LANDING...)
+
+外部关键基础设施简报 (binance OK / usdt CRITICAL / solana CRITICAL ...)
+
+Last update 时间戳
+
+右上角按钮：
+
+“交易委员会⚙” -> openDrawer('committeeConfig')
+
+<LanguageSwitcher />
+
+“暂停AI/恢复AI” toggle按钮 -> 调用后端API修改AI交易状态
+
+数据来源：
+
+useGlobalStore():
+
+accountSnapshot (equityUsd, pnlPct, cashPct etc.)
+
+riskStatus / exchangeStates
+
+lastUpdatedAt
+
+交互：
+
+点系统模式chip -> openDrawer('riskModeDetail')
+
+点“交易委员会⚙” -> openDrawer('committeeConfig')
+
+components/trade-layout/PanelsRowMain.tsx
+
+只是个容器 <div class="flex flex-row h-[520px] border-b border-white/5">
+
+<OrderBookPanel class="w-[25%]" />
+
+<ChartPanel class="w-[50%]" />
+
+<MarketAndLogsPanel class="w-[25%]" />
+
+OrderBookPanel.tsx (B1 左列)
+
+展示两个区块叠加：
+
+深度盘口 (卖单在上、买单在下)，列：Price / Amount / Total
+
+行高紧，11px字
+
+highlight 当前价
+
+最近成交列表（price, amount, time），红=卖单，绿=买单
+
+固定高度+滚动
+
+数据来源：
+
+useGlobalStore():
+
+orderBook for current activeSymbol
+
+刷新：
+
+由 useMarketData hook 更新store.orderBook
+
+ChartPanel.tsx (B2 中列)
+
+包括三块垂直结构：
+
+顶部信息条 (24h高/低/volume等, 全是12px/11px小字)
+
+中间主区域：K线 + 成交量
+
+最底部tab栏（Chart / AI Reasoning / Trading Data）
+
+逻辑：
+
+默认 tab=Chart 显示蜡烛图 (candles from store.klineData)
+
+点 "AI Reasoning" -> 不切页面，只是把K线区域临时换成 <AiReasoningView />，这个显示
+
+最近一次针对 activeSymbol 的策略说明（例如“model_B尝试开多，但被资金上限拒绝...”）
+
+文本滚动+小字
+
+点 "Trading Data" -> 将K线区域替换为一些统计图/指标，比如 OI、Funding、RSI/MACD 的近期序列（数据同样从 store 里来，如果我们后端提供）
+
+数据来源：
+
+useGlobalStore():
+
+activeSymbol
+
+klineData[activeSymbol]
+
+aiLogs（filtered by activeSymbol，用于AI Reasoning显示）
+
+交互：
+
+无需改变 activeSymbol，这里只是展示
+
+刷新：
+
+useMarketData(activeSymbol) 持续更新K线
+
+MarketAndLogsPanel.tsx (B3 右列)
+
+容器再拆两个子组件：
+
+MarketList.tsx
+
+展示白名单 10 个币的列表（BTC, ETH, BNB, SOL, XRP, DOGE, ADA, AVAX, LINK, DOT）
+
+每一行：
+
+Icon + Ticker
+
+Last Price
+
+24h %
+
+Optionally Vol/Rank 第二行小字11px灰
+
+当前选中的 activeSymbol 行用深灰高亮背景
+
+点击某币：
+
+setActiveSymbol("ETHUSDT") (通过 useGlobalStore action)
+
+这会触发 OrderBookPanel / ChartPanel / PositionTable / OrderTicket 全部切到该币
+
+数据来源：
+
+useGlobalStore():
+
+我们可以为每个白名单symbol在 store 里维护 marketSummaries[symbol] = {lastPrice, changePct24h, vol24h, ...}
+
+这些由 useMarketData 的多路订阅/轮询更新（详见后面数据流）
+
+AiLogList.tsx
+
+标题 "AI行为日志"
+
+显示最近N条（按时间倒序）
+
+HH:mm:ss model_B: 尝试开BTC多单，被资金上限拒绝 (30%/30%)
+
+小字 11px，颜色：普通白+关键字红/黄
+
+点击一条：
+
+openDrawer('aiLogDetail', {logId})
+
+Drawer 右侧显示该条完整自评+风控解释+交易理由
+
+数据来源：
+
+useGlobalStore().aiLogs
+
+刷新：
+
+useAiLogs hook 更新
+
+PanelsRowTrade.tsx
+
+容器 <div class="flex flex-row h-[200px] border-b border-white/5">
+
+<PositionAndOrderPanel class="flex-[3]" />
+
+<RiskOverviewPanel class="flex-[2] border-l border-white/5" />
+
+PositionAndOrderPanel.tsx (C1 左半)
+
+自身有 Tabs：
+
+Tab1: <PositionTable />
+
+Tab2: <OrderTicket />
+
+PositionTable.tsx
+
+表格列：
+
+方向 (多/空, 绿/红chip, 10px字)
+
+数量 / 名义价值
+
+杠杆
+
+未实现盈亏 (红/绿)
+
+止盈价 / 止损价
+
+操作列：调止损 / 一键平仓（小按钮，24px高）
+
+过滤逻辑：
+
+默认只显示当前 activeSymbol 的仓位
+
+可以有一个小下拉 "All / activeSymbol" 来切换
+
+数据来源：
+
+useGlobalStore().positions
+
+交互：
+
+点击"调止损" -> openDrawer('aiLogDetail'?) 你也可以做一个专门的 PositionEditDrawer
+
+点击"平仓" -> 调用后端平仓API, 然后 useAccountData 会在下次轮询同步更新仓位
+
+OrderTicket.tsx
+
+表单元素：
+
+订单类型Tabs：Limit / Market / Stop
+
+输入框：Price（只对Limit有用）/ Amount / Leverage
+
+派生信息：预估名义价值、所需保证金
+
+Check: [Reduce Only] (默认开，避免AI/人工在风险状态下无脑加仓)
+
+Action：
+
+“买多(绿色)”
+
+“卖空(红色)”
+两个 28px高的小矩形按钮
+
+数据绑定：
+
+默认交易对 = 全局activeSymbol
+
+可以手动改杠杆等
+
+提交逻辑：
+
+onClick -> 调用后端下单API
+
+返回结果写进审计 / aiLogs, 同时 useAccountData 下次轮询抓到新仓位状态
+
+RiskOverviewPanel.tsx (C2 右半)
+
+这里是我们“交易委员会小面板+风控态势”
+
+小字号 11px，双列或表格式：
+
+展示：
+
+现金占比 vs 安全下限
+
+账户杠杆 vs 上限
+
+保证金使用率 vs 上限
+
+最大回撤 vs 阈值
+
+系统模式chip (NORMAL / COOL_DOWN / etc)
+
+“AI交易: ON/OFF” toggle
+
+“自动风险减仓: 已触发/未触发”
+
+“止损上移: 已锁盈/未锁盈”
+
+交互：
+
+点击系统模式chip -> openDrawer('riskModeDetail')
+
+切AI toggle -> 后端接口 (允许AI下新单 or 限制AI仅减仓)
+
+这些开关和数值都来自 useAccountData + useGlobalStore
+
+RiskTickerBar.tsx (D 行)
+
+默认状态：一条24px高细bar，深红/深黄/深灰背景取决于当前最高风险级别
+
+内容像跑马灯：[CRITICAL] USDT提现暂停 | CFTC起诉XX交易所 | Solana网络延迟
+
+右边小▲按钮，点击 -> 打开 slideUp（useGlobalStore.toggleRiskSlideOpen())
+
+数据来源：
+
+useGlobalStore().riskFeeds (来自 useRiskFeeds hook)
+
+交互：
+
+打开 slideUp => 渲染 <RiskNewsSlideUp />，这个组件通常固定在页面底部上推出来，覆盖一小块高度
+
+RiskNewsSlideUp.tsx
+
+展开态下：
+
+左列：关键基础设施健康 (binance/usdt/usdc/solana/ethereum...) 每行状态tag (OK/CRITICAL)
+
+右列：RSS最新监管/稳定币相关新闻headline列表，11px文字，hover显示全文
+
+有个 close 按钮(▼) 收回
+
+数据来源：
+
+useGlobalStore().riskFeeds
+
+Drawers (components/drawers/)
+
+所有 Drawer 都是右侧固定宽 ~360px 的浮层，position: absolute; right:0; top:0; bottom:0;，背景深灰，边线一条亮线。
+
+RightDrawer.tsx
+
+负责根据 useGlobalStore().drawerState.type 决定渲染哪个 detail 组件
+
+提供统一的关闭按钮 X（调用 closeDrawer()）
+
+里面可能显示：
+
+AiDecisionDetailDrawer：展示单条AI日志完整自评、具体被拒绝的风险条件、模型理由、上一轮自我反省摘要
+
+CommitteeConfigDrawer：允许用户设定资金上限、最大杠杆、允许交易哪些白名单币（checkbox）。这些更新要调后端 /config API，并写审计日志
+
+RiskModeDetailDrawer：解释为什么现在是 COOL_DOWN / EMERGENCY_LANDING （比如“USDT=CRITICAL, binance withdraw suspended, 所以阻止所有新开仓”）
+
+2. 数据流 & 调用逻辑
+
+这一部分是关键：谁负责轮询？数据怎么塞进全局store？组件如何联动？
+
+2.1 全局状态与轮询职责
+主页面挂载时 (TradeTerminalPage useEffect)
+
+启动以下 hooks：
+
+useAccountData()
+
+useMarketData(activeSymbol) ← 注意：activeSymbol变化时，重新订阅该symbol深度/盘口/K线
+
+useAiLogs()
+
+useRiskFeeds()
+
+这些 hooks 内部会用 setInterval 或 requestAnimationFrame 风格轮询后端API，并在拿到数据后 useGlobalStore().updateXXX(...).
+
+我们已有的后端周期：
+
+BACKEND_TICK_MS: ~2秒
+
+NEWS_POLL_MS: 60秒
+
+ACCOUNT_SYNC_MS: 15秒
+
+EXCHANGE_WATCH_MS: 30秒
+
+前端可以按类似频率去拉缓存化API（或者将来走WebSocket）。
+
+hook: useAccountData()
+
+后端接口（示例）：
+
+GET /api/account/snapshot
+返回：
+
+{
+  equityUsd: number,
+  pnlPct24h: number,
+  cashPct: number,
+  cashPctMin: number,
+  maxDrawdownPct: number,
+  maxDrawdownLimitPct: number,
+  marginUsagePct: number,
+  marginUsageLimitPct: number,
+  accountLeverage: number,
+  leverageLimit: number,
+  mode: 'NORMAL' | 'COOL_DOWN_EXTERNAL_UNSAFE' | ...,
+  aiTradingEnabled: boolean,
+  riskFlags: {
+    partialTakeProfitActive: boolean,
+    raisedStopActive: boolean
+  },
+  positions: Array<{
+    symbol: string,
+    side: 'LONG' | 'SHORT',
+    size: number,
+    notionalUsd: number,
+    leverage: number,
+    unrealizedPnlUsd: number,
+    takeProfit?: number,
+    stopLoss?: number,
+  }>
+}
+
+
+useAccountData() 做的事：
+
+每2秒拉一次 /api/account/snapshot
+
+把这些写进：
+
+store.accountSnapshot （equityUsd、pnlPct等）
+
+store.positions
+
+store.riskStatus (mode, aiTradingEnabled, 风险触发状态)
+
+store.lastUpdatedAt = Date.now()
+
+hook: useMarketData(activeSymbol)
+
+后端接口（示例）：
+
+GET /api/market/depth?symbol=BTCUSDT → order book + recent trades
+
+GET /api/market/kline?symbol=BTCUSDT&interval=1m&limit=... → K线数据
+
+GET /api/market/summary → 返回所有白名单币的 lastPrice / 24h% / vol等（一次拿全10个）
+
+useMarketData 做的事：
+
+监听 activeSymbol
+
+每1~2秒调用：
+
+/api/market/depth?symbol=${activeSymbol}
+-> 更新 store.orderBook
+
+/api/market/kline?symbol=${activeSymbol}
+-> 更新 store.klineData[activeSymbol]
+
+每5秒调用：
+
+/api/market/summary
+-> 更新 store.marketSummaries[symbol] for symbol in whitelist
+
+同时，MarketList 使用的是 store.marketSummaries；
+OrderBookPanel & ChartPanel 直接用 store.orderBook 和 store.klineData[activeSymbol]。
+
+当用户在 MarketList 里点了ETH：
+
+setActiveSymbol("ETHUSDT")
+
+useMarketData 里的 activeSymbol 变了，下一轮轮询就会改成拉 ETH 数据
+
+UI 所有依赖 activeSymbol 的面板 (盘口、K线、下单面板默认交易对、持仓过滤) 都会即时切换
+
+hook: useAiLogs()
+
+后端接口（示例）：
+
+GET /api/ai/logs?limit=20
+返回最近20条AI行为快照，每条包含：
+
+{
+  id: string,
+  ts: number,
+  model: 'model_A' | 'model_B' | 'model_C',
+  symbol: string,
+  action: 'LONG' | 'SHORT' | 'HOLD' | 'EXIT' | 'BLOCKED',
+  leverage: number,
+  confidence: number,
+  reasonShort: string,   // 短句，用于AiLogList
+  reasonFull: string,    // 完整自评，Drawer里展开
+  blockedBy?: 'capital_limit' | 'cooldown' | 'risk_clamp' | ...
+}
+
+
+useAiLogs() 做的事：
+
+每2秒拉一次
+
+更新 store.aiLogs
+
+AiLogList 只展示 reasonShort
+点击一条 -> openDrawer('aiLogDetail', {logId})
+AiDecisionDetailDrawer 会从 store.aiLogs 里根据 logId 找到整条 reasonFull、blockedBy等，详细显示。
+
+ChartPanel 的 tab "AI Reasoning" 也可以从 aiLogs 里挑最近一条关于当前 activeSymbol 的，展示文字解释“为什么现在多/空/禁止开仓”。
+
+hook: useRiskFeeds()
+
+后端接口（示例）：
+
+GET /api/risk/feeds
+
+{
+  exchangeStates: {
+    binance: 'ok' | 'degraded' | 'withdrawal_suspended' | 'trading_halted' | 'regulatory_action' | 'unreachable',
+    usdt: 'ok' | 'critical' | ...,
+    usdc: 'ok' | 'critical' | ...,
+    solana: 'ok' | 'critical' | ...,
+    ethereum: 'ok' | 'critical' | ...
+  },
+  criticalHeadlines: Array<{
+    ts: number,
+    source: 'SEC' | 'CFTC' | 'FCA' | 'ESMA' | 'CIRCLE' | 'TETHER' | ...,
+    title: string,
+    summary: string
+  }>
+}
+
+
+useRiskFeeds() 做的事：
+
+每30~60秒拉一次
+
+更新 store.riskFeeds
+
+RiskTickerBar 用这些数据拼跑马灯
+
+RiskNewsSlideUp 用这些数据填展开面板（左列状态灯 / 右列headline列表）
+
+2.2 用户交互 → 后端调用
+
+切换交易币种
+
+用户点击右列 MarketList 的 "ETHUSDT"
+
+setActiveSymbol("ETHUSDT")
+
+不打后端请求立刻；只是更新全局状态
+
+接下来 useMarketData 自动开始对新symbol轮询深度&K线
+
+下单
+
+用户在 OrderTicket 里填价格、数量、杠杆 -> 点 “买多”
+
+前端：POST /api/order/create
+
+{
+  symbol: activeSymbol,
+  side: "LONG",
+  type: "LIMIT" | "MARKET" | "STOP",
+  price?: number,
+  amount: number,
+  leverage: number,
+  reduceOnly: boolean
+}
+
+
+后端回执：
+
+{ ok: true, orderId: "...", status: "accepted" | "rejected", reason?: "cooldown" | "capital_limit" ... }
+
+
+如果 rejected，我们可以直接把这个信息 push 成一条新的AI日志样式本地显示，或者等下一轮 useAiLogs() 把它抓回来统一展示。
+
+useAccountData() 下次tick就会反映新仓位（或无变化）。
+
+平仓 / 调止损
+
+平仓按钮：POST /api/order/closePosition {symbol}
+
+调整止损：POST /api/position/updateStop {symbol, stopLoss, takeProfit}
+
+成功后不立即手动改UI，直接等待下一轮 useAccountData() 更新 store.positions
+
+暂停AI / 允许AI交易
+
+HeaderBar / RiskOverviewPanel里有开关
+
+POST /api/system/ai-trading-toggle { enabled: boolean }
+
+后端更新自己的策略状态，写审计
+
+下次 useAccountData() 会拿到新的 aiTradingEnabled
+
+交易委员会⚙ 配置修改
+
+Drawer: CommitteeConfigDrawer 有如“最大杠杆上限”、“资金使用上限(%)”、“白名单币种是否允许AI交易（checkbox）”
+
+保存 -> POST /api/system/config
+
+{
+  leverageLimit: number,
+  capitalUsageLimitPct: number,
+  allowedSymbols: string[]
+}
+
+
+后端记审计、更新风控阈值
+
+下一轮 useAccountData() / useRiskFeeds() / useAiLogs() 都会在对应字段体现。
+
+点击系统模式chip看详情
+
+openDrawer('riskModeDetail')
+
+Drawer 里会解释为什么现在是 COOL_DOWN、是谁触发、触发条件是什么（我们后端已经在风控引擎里有这个解释字段）
+
+这里不一定要POST，主要是显示信息
+
+2.3 类型协同 (types.ts 建议扩展)
+
+为了让前端/后端对齐，types.ts 应包含：
+
+export type AccountSnapshot = {
+  equityUsd: number;
+  pnlPct24h: number;
+  cashPct: number;
+  cashPctMin: number;
+  maxDrawdownPct: number;
+  maxDrawdownLimitPct: number;
+  marginUsagePct: number;
+  marginUsageLimitPct: number;
+  accountLeverage: number;
+  leverageLimit: number;
+  mode: 'NORMAL' | 'COOL_DOWN_EXTERNAL_UNSAFE' | 'COOL_DOWN_CAPITAL_STRESS' | 'EMERGENCY_LANDING' | ...;
+  aiTradingEnabled: boolean;
+  riskFlags: {
+    partialTakeProfitActive: boolean;
+    raisedStopActive: boolean;
+  };
+};
+
+export type Position = {
+  symbol: string;
+  side: 'LONG' | 'SHORT';
+  size: number;
+  notionalUsd: number;
+  leverage: number;
+  unrealizedPnlUsd: number;
+  takeProfit?: number;
+  stopLoss?: number;
+};
+
+export type OrderBookState = {
+  asks: Array<{ price: number; amount: number; total: number }>;
+  bids: Array<{ price: number; amount: number; total: number }>;
+  lastTrades: Array<{ price: number; amount: number; side: 'buy' | 'sell'; ts: number }>;
+  markPrice: number; // optional
+};
+
+export type Candle = {
+  ts: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+};
+export type KlineDataMap = Record<string, Candle[]>;
+
+export type MarketSummary = {
+  symbol: string;
+  lastPrice: number;
+  changePct24h: number;
+  vol24hUsd?: number;
+  vol24hBase?: number;
+};
+export type MarketSummariesMap = Record<string, MarketSummary>;
+
+export type AiLogEntry = {
+  id: string;
+  ts: number;
+  model: string; // 'model_A' | 'model_B' | 'model_C'
+  symbol: string;
+  action: string; // 'LONG' | 'SHORT' | 'HOLD' | 'EXIT' | 'BLOCKED'
+  leverage: number;
+  confidence: number;
+  reasonShort: string;
+  reasonFull: string;
+  blockedBy?: string;
+};
+
+export type ExchangeStates = {
+  binance: string;
+  usdt: string;
+  usdc: string;
+  solana: string;
+  ethereum: string;
+  // ...others as needed
+};
+
+export type RiskHeadline = {
+  ts: number;
+  source: string;
+  title: string;
+  summary: string;
+};
+
+export type RiskFeeds = {
+  exchangeStates: ExchangeStates;
+  criticalHeadlines: RiskHeadline[];
+};
+
+
+useGlobalStore 的内部 state 大概会是：
+
+type GlobalStore = {
+  activeSymbol: string;
+
+  accountSnapshot: AccountSnapshot | null;
+  positions: Position[];
+
+  orderBook: OrderBookState | null;
+  klineData: KlineDataMap; // keyed by symbol
+
+  marketSummaries: MarketSummariesMap; // keyed by symbol
+
+  aiLogs: AiLogEntry[];
+
+  riskFeeds: RiskFeeds | null;
+
+  lastUpdatedAt: number | null;
+
+  drawerState: {
+    type: 'none' | 'aiLogDetail' | 'committeeConfig' | 'riskModeDetail';
+    data?: any;
+  };
+
+  riskSlideOpen: boolean;
+
+  // actions
+  setActiveSymbol(sym: string): void;
+  openDrawer(type: DrawerType, data?: any): void;
+  closeDrawer(): void;
+  toggleRiskSlide(open?: boolean): void;
+
+  hydrateAccount(snapshot: AccountSnapshot, positions: Position[]): void;
+  hydrateMarket(symbol: string, depth: OrderBookState, candles: Candle[]): void;
+  hydrateSummaries(summaries: MarketSummariesMap): void;
+  hydrateAiLogs(logs: AiLogEntry[]): void;
+  hydrateRiskFeeds(riskFeeds: RiskFeeds): void;
+  setLastUpdatedAt(ts: number): void;
+};
+
+结尾总结（给工程师）
+
+我们把原本的两个界面合并成一个“交易终端页”：TradeTerminalPage.tsx。
+
+页面分四行（A/B/C/D），所有关键信息（资金、生死线风险、盘口、K线、持仓、下单、AI决策理由、监管新闻）全部在这一页，且小字高密度展示。
+
+我们引入全局 store（useGlobalStore）作为状态中枢。
+
+activeSymbol 决定整个终端当前在看/交易哪个币。
+
+其他状态（资金快照、盘口、K线、AI日志、风险源、仓位）都定期轮询后端接口的结果来更新。
+
+右侧 Drawer & 底部 SlideUp 用来显示更多细节/配置，而不跳路由。
+
+币池是硬编码的 6~10 个主流币，不允许AI下垃圾币；点币种不会跳新页面，只会切全局 activeSymbol。
+
+这样，设计、数据和交互都对齐了。前端可以按上述结构拆组件，后端可以针对我们列出的接口返回这些统一的结构体；大家以后都围绕 /trade 这个单页协作。

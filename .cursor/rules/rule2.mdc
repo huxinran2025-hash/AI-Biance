@@ -1,0 +1,5 @@
+---
+description:每次更新完后检查还有什么未完成的，计划下一个优先级任务
+globs:
+alwaysApply: true
+---
