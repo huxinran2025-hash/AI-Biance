@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { createServer } from 'node:http';
-import { WebSocketServer } from 'ws';
+import { WebSocket, WebSocketServer } from 'ws';
 import type { AccountRiskLimits, DashboardState, UserAIConfig, UserSessionConfig } from './types';
 import {
   startBackend,
@@ -284,7 +284,7 @@ setInterval(async () => {
     const state = await getDashboardState();
     const payload = JSON.stringify({ type: 'dashboard:update', data: state });
     for (const client of wss.clients) {
-      if (client.readyState === client.OPEN) {
+      if (client.readyState === WebSocket.OPEN) {
         client.send(payload);
       }
     }
